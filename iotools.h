@@ -11,17 +11,17 @@ class IoTools{ // Common class for various projects
 	
 	public:
 
-		void upLine(int jumps = 1){
+		static void upLine(int jumps = 1){
 			for (int i = 0 ; i < jumps ; i++){
 				cout<<"\x1b[1F";
 			}
 		}
 
-		void clearLine(){
+		static void clearLine(){
 			cout<<"\x1b[2K";
 		}
 
-		void lineTool(int size, char lineChar = '-', bool returnLine = false){
+		static void lineTool(int size, char lineChar = '-', bool returnLine = false){
 			for (int i = 0 ; i < size ; i++){
 				cout<<lineChar;
 			}
@@ -30,7 +30,7 @@ class IoTools{ // Common class for various projects
 			}
 		}
 
-		void barTool(float nominator = 0 , float denominator = 1 , int barLength = 100 , bool percentDisplay = true, bool returnLine = false){
+		static void barTool(float nominator = 0 , float denominator = 1 , int barLength = 100 , bool percentDisplay = true, bool returnLine = false){
 			float tempLengthFloat = (nominator/denominator)*((float)barLength);
 			int tempLength = tempLengthFloat;
 			if (tempLengthFloat - tempLength > 0.5){
@@ -49,7 +49,7 @@ class IoTools{ // Common class for various projects
 			}
 	} 
 
-		void promptTool(char prompt[500] , char result[500] , char error[500],bool doError = false, bool isNumber = false){
+		static void promptTool(char prompt[500] , char result[500] , char error[500],bool doError = false, bool isNumber = false){
 
 			if (!doError){
 				bool errorFlag;
@@ -99,7 +99,7 @@ class IoTools{ // Common class for various projects
 
 		}
 
-		void graphTool(char xName[20], char yName[20], float xMinMax[2], float yMinMax[2], int pointNum, float points[100][2], int xIncr = 10, int yIncr = 5){
+		static void graphTool(char xName[20], char yName[20], float xMinMax[2], float yMinMax[2], int pointNum, float points[100][2], int xIncr = 10, int yIncr = 5){
 			if (yMinMax[0] >= 0){
 				// Sectioned off the code that prints the graph without points
 				{

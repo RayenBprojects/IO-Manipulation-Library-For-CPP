@@ -92,7 +92,7 @@ class IoTools{ // Common class for various projects
 			else{
 				cout<<error;
 				getch();
-				while(!kbhit){}
+				while(!kbhit()){}
 				getch();
 				cout<<"\x1b[2K"<<"\x1b[1F"<<"\x1b[2K";
 			}
@@ -181,6 +181,183 @@ class IoTools{ // Common class for various projects
 			}
 
 		}
-};
+
+		class PageTool{
+
+			public:
+
+				string *entry;
+
+				PageTool(){
+					commandNum = 0;
+					textNum = 0;
+					DownNum = 0;
+					lineNum = 0;
+					barNum = 0;
+					promptNum = 0;
+					graphNum = 0;
+
+					entry = NULL;
+					commands = NULL;
+					textArgs = NULL;
+				}
+
+				~PageTool(){
+					delete[] entry;
+					delete[] commands;
+					delete[] textArgs;
+
+				}
+
+				void showPage(){
+
+					system("cls");
+
+					int textCount = 0;
+
+					for (int i = 0 ; i < commandNum ; i++){
+
+						switch (commands[i]){
+
+							case 0:
+
+								cout<<textArgs[textCount].text;
+								if (textArgs[textCount].returnLine){
+									cout<<endl;
+								}
+								
+								textCount++;
+								break;
+						};
+					}
+				}
+
+				void clearPage(){
+					
+					delete[] entry;
+					delete[] commands;
+					commandNum = 0;
+					delete[] textArgs;
+					textNum = 0;
+				}
+				
+				void addText(string text , bool returnLine = true){
+
+					commandNum++;
+					textNum++;
+
+					bool allocFlag;
+					do{
+						allocFlag = true;
+
+						int *tempAlloc = new int[commandNum];
+
+						if (tempAlloc == NULL){
+							allocFlag = false;
+						}
+						else{
+							for (int i = 0 ; i < commandNum-1 ; i++){
+								tempAlloc[i] = commands[i];
+							}
+							delete[] commands;
+							commands = tempAlloc;
+						}
+					} while(allocFlag == false);
+
+					commands[commandNum-1]= TEXT;
+
+					do{
+						allocFlag = true;
+
+						Text* tempAlloc = new Text[textNum];
+
+						if (tempAlloc == NULL){
+							allocFlag = false;
+						}
+						else{
+							for (int i = 0 ; i < textNum-1 ; i++){
+								tempAlloc[i] = textArgs[i];
+							}
+							delete[] textArgs;
+							textArgs = tempAlloc;
+						}
+
+					} while (allocFlag == false);
+
+					textArgs[textNum-1].text = text;
+					textArgs[textNum-1].returnLine = returnLine;
+				}
+
+			private:
+
+				int *commands;
+
+				int commandNum;
+
+				int textNum;
+
+				int DownNum;
+
+				int lineNum;
+
+				int barNum;
+
+				int promptNum;
+
+				int graphNum;
+
+				struct Text{
+					string text;
+					bool returnLine;
+				};
+
+				struct Down{
+
+				};
+
+				
+				struct Line{
+
+				};
+
+				struct Bar{
+
+				};
+
+				struct Prompt{
+
+				};
+
+				struct Graph{
+
+				};
+
+				Text *textArgs;
+
+				Down *downArgs;
+
+				Line *lineArgs;
+
+				Bar *barArgs;
+
+				Prompt *promptArgs;
+
+				Graph *graphArgs;
+
+				const short TEXT = 0;
+
+				const short DOWN = 1;
+
+				const short LINE = 2;
+
+				const short BAR = 3;
+
+				const short PROMPT = 4;
+
+				const short GRAPH = 5;
+
+		};
+
+	};
 
 #endif

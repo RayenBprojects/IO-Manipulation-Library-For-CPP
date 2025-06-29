@@ -191,7 +191,7 @@ class IoTools{ // Common class for various projects
 				PageTool(){
 					commandNum = 0;
 					textNum = 0;
-					DownNum = 0;
+					returnNum = 0;
 					lineNum = 0;
 					barNum = 0;
 					promptNum = 0;
@@ -200,12 +200,18 @@ class IoTools{ // Common class for various projects
 					entry = NULL;
 					commands = NULL;
 					textArgs = NULL;
+					returnLineArgs = NULL;
+					lineArgs = NULL;
+					barArgs = NULL;
+					promptArgs = NULL;
+					graphArgs = NULL;
 				}
 
 				~PageTool(){
 					delete[] entry;
 					delete[] commands;
 					delete[] textArgs;
+					delete[] returnLineArgs;
 
 				}
 
@@ -213,7 +219,7 @@ class IoTools{ // Common class for various projects
 
 					system("cls");
 
-					int textCount = 0;
+					int count[6] = {0};
 
 					for (int i = 0 ; i < commandNum ; i++){
 
@@ -221,12 +227,20 @@ class IoTools{ // Common class for various projects
 
 							case 0:
 
-								cout<<textArgs[textCount].text;
-								if (textArgs[textCount].returnLine){
+								cout<<textArgs[count[TEXT]].text;
+								if (textArgs[count[TEXT]].returnLine){
 									cout<<endl;
 								}
 								
-								textCount++;
+								count[TEXT]++;
+								break;
+
+							case 1:
+								for (int n = 0 ; n < returnLineArgs[count[RETURNLINE]].returns ; n++){
+									cout<<endl;
+								}
+
+								count[RETURNLINE]++;
 								break;
 						};
 					}
@@ -235,57 +249,34 @@ class IoTools{ // Common class for various projects
 				void clearPage(){
 					
 					delete[] entry;
+					entry = NULL;
+
 					delete[] commands;
+					commands = NULL;
 					commandNum = 0;
+					
 					delete[] textArgs;
+					textArgs = NULL;
 					textNum = 0;
+
+					delete[] returnLineArgs;
+					returnLineArgs = NULL;
+					returnNum = 0;
 				}
-				
+
 				void addText(string text , bool returnLine = true){
 
-					commandNum++;
-					textNum++;
-
-					bool allocFlag;
-					do{
-						allocFlag = true;
-
-						int *tempAlloc = new int[commandNum];
-
-						if (tempAlloc == NULL){
-							allocFlag = false;
-						}
-						else{
-							for (int i = 0 ; i < commandNum-1 ; i++){
-								tempAlloc[i] = commands[i];
-							}
-							delete[] commands;
-							commands = tempAlloc;
-						}
-					} while(allocFlag == false);
-
-					commands[commandNum-1]= TEXT;
-
-					do{
-						allocFlag = true;
-
-						Text* tempAlloc = new Text[textNum];
-
-						if (tempAlloc == NULL){
-							allocFlag = false;
-						}
-						else{
-							for (int i = 0 ; i < textNum-1 ; i++){
-								tempAlloc[i] = textArgs[i];
-							}
-							delete[] textArgs;
-							textArgs = tempAlloc;
-						}
-
-					} while (allocFlag == false);
+					commandAdd(TEXT);
 
 					textArgs[textNum-1].text = text;
 					textArgs[textNum-1].returnLine = returnLine;
+				}
+
+				void returnLine(int returns){
+
+					commandAdd(RETURNLINE);
+
+					returnLineArgs[returnNum-1].returns = returns;
 				}
 
 			private:
@@ -296,7 +287,7 @@ class IoTools{ // Common class for various projects
 
 				int textNum;
 
-				int DownNum;
+				int returnNum;
 
 				int lineNum;
 
@@ -311,8 +302,8 @@ class IoTools{ // Common class for various projects
 					bool returnLine;
 				};
 
-				struct Down{
-
+				struct ReturnLine{
+					int returns;
 				};
 
 				
@@ -334,7 +325,7 @@ class IoTools{ // Common class for various projects
 
 				Text *textArgs;
 
-				Down *downArgs;
+				ReturnLine *returnLineArgs;
 
 				Line *lineArgs;
 
@@ -346,7 +337,7 @@ class IoTools{ // Common class for various projects
 
 				const short TEXT = 0;
 
-				const short DOWN = 1;
+				const short RETURNLINE = 1;
 
 				const short LINE = 2;
 
@@ -355,6 +346,79 @@ class IoTools{ // Common class for various projects
 				const short PROMPT = 4;
 
 				const short GRAPH = 5;
+
+				void commandAdd(short newCommand){
+
+					commandNum++;
+
+					bool allocFlag;
+					do{
+						allocFlag = true;
+
+						int *tempAlloc = new int[commandNum];
+
+						if (tempAlloc == NULL){
+							allocFlag = false;
+						}
+						else{
+							for (int i = 0 ; i < commandNum-1 ; i++){
+								tempAlloc[i] = commands[i];
+							}
+							delete[] commands;
+							commands = tempAlloc;
+						}
+					} while(allocFlag == false);
+
+					commands[commandNum-1] = newCommand;
+
+					do{
+						allocFlag = true;
+
+						void* tempAlloc;
+
+						Text *textAlloc;
+						ReturnLine *returnLineAlloc;
+						Line *lineAlloc;
+						Bar *barAlloc;
+						Prompt *promptAlloc;
+						Graph *graphAlloc;
+
+						switch(newCommand){
+							case 0:
+								textNum++;
+								textAlloc = new Text[commandNum];
+
+								if (textAlloc == NULL){
+									allocFlag = false;
+								}
+								else{
+									for (int i = 0 ; i < textNum-1 ; i++){
+										textAlloc[i] = textArgs[i];
+									}
+									delete[] textArgs;
+									textArgs = textAlloc;
+								}
+								break;
+							
+							case 1:
+								returnNum++;
+								returnLineAlloc = new ReturnLine[commandNum];
+
+								if (returnLineAlloc == NULL){
+									allocFlag = false;
+								}
+								else{
+									for (int i = 0 ; i < returnNum-1 ; i++){
+										returnLineAlloc[i] = returnLineArgs[i];
+									}
+									delete[] returnLineArgs;
+									returnLineArgs = returnLineAlloc;
+								}
+								break;
+						}
+					} while (allocFlag == false);
+
+				}
 
 		};
 

@@ -182,7 +182,7 @@ class IoTools{ // Common class for various projects
 
 		}
 
-		class PageTool{
+		class PageTool{ //Next: add functionality to display lines, then move on to other functions
 
 			public:
 
@@ -262,6 +262,22 @@ class IoTools{ // Common class for various projects
 					delete[] returnLineArgs;
 					returnLineArgs = NULL;
 					returnNum = 0;
+
+					delete[] lineArgs;
+					lineArgs = NULL;
+					lineNum = 0;
+
+					delete[] barArgs;
+					barArgs = NULL;
+					barNum = 0;
+
+					delete[] promptArgs;
+					promptArgs = NULL;
+					promptNum = 0;
+
+					delete[] graphArgs;
+					graphArgs = NULL;
+					graphNum = 0;
 				}
 
 				void addText(string text , bool returnLine = true){
@@ -272,11 +288,19 @@ class IoTools{ // Common class for various projects
 					textArgs[textNum-1].returnLine = returnLine;
 				}
 
-				void returnLine(int returns){
+				void addReturnLine(int returns){
 
 					commandAdd(RETURNLINE);
 
 					returnLineArgs[returnNum-1].returns = returns;
+				}
+
+				void addLine(int size, char lineChar = '-', bool returnLine = false){
+
+					commandAdd(LINE);
+					lineArgs[lineNum-1].size = size;
+					lineArgs[lineNum-1].lineChar = lineChar;
+					lineArgs[lineNum-1].returnLine = returnLine; // unrelated to returnLine functionality, horrible naming I know
 				}
 
 			private:
@@ -308,7 +332,9 @@ class IoTools{ // Common class for various projects
 
 				
 				struct Line{
-
+					int size;
+					char lineChar;
+					bool returnLine;
 				};
 
 				struct Bar{
@@ -413,6 +439,22 @@ class IoTools{ // Common class for various projects
 									}
 									delete[] returnLineArgs;
 									returnLineArgs = returnLineAlloc;
+								}
+								break;
+
+							case 2:
+								lineNum++;
+								lineAlloc = new Line[commandNum];
+
+								if (lineAlloc == NULL){
+									allocFlag = false;
+								}
+								else{
+									for (int i = 0 ; i < lineNum-1 ; i++){
+										lineAlloc[i] = lineArgs[i];
+									}
+									delete[] lineArgs;
+									lineArgs = lineAlloc;
 								}
 								break;
 						}

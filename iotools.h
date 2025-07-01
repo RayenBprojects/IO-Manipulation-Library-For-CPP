@@ -17,6 +17,12 @@ class IoTools{ // Common class for various projects
 			}
 		}
 
+		static void downLine(int jumps =1){
+			for (int i = 0 ; i < jumps ; i++){
+				cout<<endl;
+			}
+		}
+
 		static void clearLine(){
 			cout<<"\x1b[2K";
 		}
@@ -49,6 +55,7 @@ class IoTools{ // Common class for various projects
 			}
 	} 
 
+	// CONCERN: COULD BREAK IF FED NEWLINES, PLEASE ADD FIX
 		static void promptTool(char prompt[500] , char result[500] , char error[500],bool doError = false, bool isNumber = false){
 
 			if (!doError){
@@ -99,6 +106,7 @@ class IoTools{ // Common class for various projects
 
 		}
 
+	// CONCERN: COULD BREAK IF FED NEWLINES, PLEASE ADD FIX
 		static void graphTool(char xName[20], char yName[20], float xMinMax[2], float yMinMax[2], int pointNum, float points[100][2], int xIncr = 10, int yIncr = 5){
 			if (yMinMax[0] >= 0){
 				// Sectioned off the code that prints the graph without points
@@ -179,10 +187,10 @@ class IoTools{ // Common class for various projects
 				}
 				cout<<endl<<endl<<endl;
 			}
-
+			cout<<endl;
 		}
 
-		class PageTool{ //Next: add functionality to display lines, then move on to other functions
+		class PageTool{ // must add robust prompt display system, must add a dropCount system for displaying graphs
 
 			public:
 
@@ -220,30 +228,96 @@ class IoTools{ // Common class for various projects
 					system("cls");
 
 					int count[6] = {0};
+					int dropCount = 0; // counts how many lines were added, especially necessary for prompts
+
+					int* promptPositions;
+					bool allocFlag;
+					do{
+						allocFlag = true;
+						promptPositions = new int[promptNum];
+						if (promptPositions == NULL){
+							allocFlag = false;
+						}
+					} while(allocFlag == false);
 
 					for (int i = 0 ; i < commandNum ; i++){
 
 						switch (commands[i]){
 
-							case 0:
+							case 0: // addText
 
 								cout<<textArgs[count[TEXT]].text;
 								if (textArgs[count[TEXT]].returnLine){
 									cout<<endl;
+									dropCount++;
 								}
 								
+								for (int i = 0 ; i < textArgs[count[TEXT]].text.length() ; i++){
+									if (textArgs[count[TEXT]].text[i] == '\n'){
+										dropCount++;
+									}
+								}
 								count[TEXT]++;
 								break;
 
-							case 1:
+							case 1: // addReturnLine
 								for (int n = 0 ; n < returnLineArgs[count[RETURNLINE]].returns ; n++){
 									cout<<endl;
+									dropCount++;
 								}
 
 								count[RETURNLINE]++;
 								break;
-						};
+
+							case 2: // addLine
+								lineTool(lineArgs[count[LINE]].size, lineArgs[count[LINE]].lineChar, lineArgs[count[LINE]].returnLine);
+
+								if (lineArgs[count[LINE]].returnLine){
+									dropCount++;
+								}
+								count[LINE]++;
+								break;
+
+							case 3: //  addBarArgs
+								barTool(barArgs[count[BAR]].nominator, barArgs[count[BAR]].denominator, barArgs[count[BAR]].barLength, barArgs[count[BAR]].percentDisplay, barArgs[count[BAR]].returnLine);
+
+								if (barArgs[count[BAR]].returnLine){
+									dropCount++;
+								}
+								count[BAR]++;
+								break;
+							
+							case 4: // addPrompt
+								//promptTool(promptArgs[count[PROMPT]].prompt, promptArgs[count[PROMPT]].result, promptArgs[count[PROMPT]].error, promptArgs[count[PROMPT]].doError, promptArgs[count[PROMPT]].isNumber);
+								cout<<promptArgs[count[PROMPT]].prompt<<endl;
+
+								dropCount++;
+								promptPositions[count[PROMPT]] = dropCount;
+								count[PROMPT]++;
+								break;
+							
+							case 5: // addGraph
+								graphTool(graphArgs[count[GRAPH]].xName, graphArgs[count[GRAPH]].yName, graphArgs[count[GRAPH]].xMinMax, graphArgs[count[GRAPH]].yMinMax, graphArgs[count[GRAPH]].pointNum, graphArgs[count[GRAPH]].points, graphArgs[count[GRAPH]].xIncr, graphArgs[count[GRAPH]].yIncr);
+
+								dropCount += 4 + 6*graphArgs[count[GRAPH]].yIncr;
+								count[GRAPH]++;
+								break;
+						}
 					}
+
+					int n = 0;
+					for (int i = 0 ; i < commandNum ; i++){
+						if (commands[i] == PROMPT){
+							upLine(dropCount-promptPositions[i]);
+							clearLine();
+							promptTool(promptArgs[n].prompt, promptArgs[n].result, promptArgs[n].error, promptArgs[n].doError, promptArgs[n].isNumber);
+							downLine(dropCount-1);
+
+							n++;
+						}
+					}
+
+					delete[] promptPositions;
 				}
 
 				void clearPage(){
@@ -288,14 +362,14 @@ class IoTools{ // Common class for various projects
 					textArgs[textNum-1].returnLine = returnLine;
 				}
 
-				void addReturnLine(int returns){
+				void addReturnLine(int returns = 1){
 
 					commandAdd(RETURNLINE);
 
 					returnLineArgs[returnNum-1].returns = returns;
 				}
 
-				void addLine(int size, char lineChar = '-', bool returnLine = false){
+				void addLine(int size, char lineChar = '-', bool returnLine = true){
 
 					commandAdd(LINE);
 					lineArgs[lineNum-1].size = size;
@@ -303,6 +377,42 @@ class IoTools{ // Common class for various projects
 					lineArgs[lineNum-1].returnLine = returnLine; // unrelated to returnLine functionality, horrible naming I know
 				}
 
+				void addBar(float nominator = 0, float denominator = 1, int barLength = 100, bool percentDisplay = true, bool returnLine = true){
+					commandAdd(BAR);
+
+					barArgs[barNum-1].nominator = nominator;
+					barArgs[barNum-1].denominator = denominator;
+					barArgs[barNum-1].barLength = barLength;
+					barArgs[barNum-1].percentDisplay = percentDisplay;
+					barArgs[barNum-1].returnLine = returnLine;
+				}
+
+				void addPrompt( char prompt[500], char result[500], char error[500], bool doError = false, bool isNumber = false ){
+					commandAdd(PROMPT);
+
+					promptArgs[promptNum-1].prompt = prompt;
+					promptArgs[promptNum-1].result = result;
+					promptArgs[promptNum-1].error = error;
+					promptArgs[promptNum-1].doError = doError;
+					promptArgs[promptNum-1].isNumber = isNumber;
+				}
+
+				void addGraph(char xName[20], char yName[20], float xMinMax[2], float yMinMax[2], int pointNum, float points[100][2], int xIncr = 10, int yIncr = 5){
+					commandAdd(GRAPH);
+
+					graphArgs[graphNum-1].xName = xName;
+					graphArgs[graphNum-1].yName = yName;
+					graphArgs[graphNum-1].xMinMax = xMinMax;
+					graphArgs[graphNum-1].yMinMax = yMinMax;
+					graphArgs[graphNum-1].pointNum = pointNum;
+					for (int i = 0 ; i < 100 ; i++){
+						for (int n = 0 ; n < 100 ; n++){
+							graphArgs[graphNum-1].points[i][n] = points[i][n];
+						}
+					}
+					graphArgs[graphNum-1].yIncr = yIncr;
+					graphArgs[graphNum-1].xIncr = xIncr;
+				}
 			private:
 
 				int *commands;
@@ -338,15 +448,30 @@ class IoTools{ // Common class for various projects
 				};
 
 				struct Bar{
-
+					float nominator;
+					float denominator;
+					int barLength;
+					bool percentDisplay;
+					bool returnLine;
 				};
 
 				struct Prompt{
-
+					char* prompt;
+					char* result;
+					char* error;
+					bool doError;
+					bool isNumber;
 				};
 
 				struct Graph{
-
+					char* xName;
+					char* yName;
+					float* xMinMax;
+					float* yMinMax;
+					int pointNum;
+					float points[100][2];
+					int xIncr;
+					int yIncr;
 				};
 
 				Text *textArgs;
@@ -455,6 +580,53 @@ class IoTools{ // Common class for various projects
 									}
 									delete[] lineArgs;
 									lineArgs = lineAlloc;
+								}
+								break;
+							
+							case 3:
+								barNum++;
+								barAlloc = new Bar[commandNum];
+
+								if (barAlloc == NULL){
+									allocFlag = false;
+								}
+								else{
+									for (int i = 0 ; i < lineNum-1 ; i++){
+										barAlloc[i] = barArgs[i];
+									}
+									delete[] barArgs;
+									barArgs = barAlloc;
+								}
+								break;
+							
+							case 4:
+								promptNum++;
+								promptAlloc = new Prompt[commandNum];
+
+								if (promptAlloc == NULL){
+									allocFlag = false;
+								}
+								else{
+									for (int i = 0 ; i < promptNum-1 ; i++){
+										promptAlloc[i] = promptArgs[i];
+									}
+									delete[] barArgs;
+									promptArgs = promptAlloc;
+								}
+								break;
+							case 5:
+								graphNum++;
+								graphAlloc = new Graph[commandNum];
+
+								if (graphAlloc == NULL){
+									allocFlag = false;
+								}
+								else{
+									for (int i = 0 ; i < graphNum-1 ; i++){
+										graphAlloc[i] = graphArgs[i];
+									}
+									delete[] graphArgs;
+									graphArgs = graphAlloc;
 								}
 								break;
 						}

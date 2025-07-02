@@ -14,6 +14,7 @@ class IoTools{ // Common class for various projects
 		static void upLine(int jumps = 1){
 			for (int i = 0 ; i < jumps ; i++){
 				cout<<"\x1b[1F";
+				//cout<<"\033[A";  This break some stuff, this bad, can't find info on what the difference is
 			}
 		}
 
@@ -190,7 +191,7 @@ class IoTools{ // Common class for various projects
 			cout<<endl;
 		}
 
-		class PageTool{ // must add robust prompt display system, must add a dropCount system for displaying graphs
+		class PageTool{
 
 			public:
 
@@ -237,6 +238,11 @@ class IoTools{ // Common class for various projects
 						promptPositions = new int[promptNum];
 						if (promptPositions == NULL){
 							allocFlag = false;
+						}
+						else{
+							for (int i = 0 ; i < promptNum ; i++){
+								promptPositions[i] = 0;
+							}
 						}
 					} while(allocFlag == false);
 
@@ -288,18 +294,18 @@ class IoTools{ // Common class for various projects
 								break;
 							
 							case 4: // addPrompt
-								//promptTool(promptArgs[count[PROMPT]].prompt, promptArgs[count[PROMPT]].result, promptArgs[count[PROMPT]].error, promptArgs[count[PROMPT]].doError, promptArgs[count[PROMPT]].isNumber);
 								cout<<promptArgs[count[PROMPT]].prompt<<endl;
 
-								dropCount++;
+								
 								promptPositions[count[PROMPT]] = dropCount;
+								dropCount++;
 								count[PROMPT]++;
 								break;
 							
 							case 5: // addGraph
 								graphTool(graphArgs[count[GRAPH]].xName, graphArgs[count[GRAPH]].yName, graphArgs[count[GRAPH]].xMinMax, graphArgs[count[GRAPH]].yMinMax, graphArgs[count[GRAPH]].pointNum, graphArgs[count[GRAPH]].points, graphArgs[count[GRAPH]].xIncr, graphArgs[count[GRAPH]].yIncr);
 
-								dropCount += 4 + 6*graphArgs[count[GRAPH]].yIncr;
+								dropCount += 6 + 6*graphArgs[count[GRAPH]].yIncr;
 								count[GRAPH]++;
 								break;
 						}
@@ -308,10 +314,10 @@ class IoTools{ // Common class for various projects
 					int n = 0;
 					for (int i = 0 ; i < commandNum ; i++){
 						if (commands[i] == PROMPT){
-							upLine(dropCount-promptPositions[i]);
+							upLine(dropCount-promptPositions[n]);
 							clearLine();
 							promptTool(promptArgs[n].prompt, promptArgs[n].result, promptArgs[n].error, promptArgs[n].doError, promptArgs[n].isNumber);
-							downLine(dropCount-1);
+							downLine(dropCount-promptPositions[n]-1);
 
 							n++;
 						}
@@ -614,6 +620,7 @@ class IoTools{ // Common class for various projects
 									promptArgs = promptAlloc;
 								}
 								break;
+
 							case 5:
 								graphNum++;
 								graphAlloc = new Graph[commandNum];

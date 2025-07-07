@@ -12,6 +12,9 @@ It is subject to improvement through new features over time, with backwards comp
 
 ### User Prompts
 ![image](https://github.com/user-attachments/assets/42483bde-10ae-46c5-92cc-e2238560326f)
-	
+
+# Guide
+Please refer to the repository Wiki for documentation.
+
 # Major Updates:
 v1.0.0: The Page Management Update, adds a brand new object oriented page system
